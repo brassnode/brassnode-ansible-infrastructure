@@ -1,0 +1,35 @@
+---
+- name: Create Hetzner server
+  hetzner.hcloud.server:
+    api_token: "{{ hcloud_token }}"
+    name: "{{ server_name }}"
+    server_type: "{{ provision_hcloud_server_type }}"
+    image: "{{ provision_hcloud_server_image }}"
+    location: "{{ hcloud_datacenter }}"
+    ssh_keys:
+      - "{{ hcloud_ssh_key_name }}"
+    state: present
+  register: provision_hcloud_server_result
+
+- name: Attach server to private network
+  hetzner.hcloud.server_network:
+    api_token: "{{ hcloud_token }}"
+    network: "{{ create_hcloud_network_name }}"
+    server: "{{ server_name }}"
+    ip: "{{ private_ip }}"
+    state: present
+
+- name: Add new server to in-memory inventory
+  ansible.builtin.add_host:
+    name: "{{ server_name }}"
+    groups: haraka
+    ansible_host: "{{ provision_hcloud_server_result.hcloud_server.ipv4_address }}"
+    ansible_user: "{{ ansible_user }}"
+    ansible_ssh_private_key_file: "{{ ansible_ssh_private_key_file }}"
+    server_public_ip: "{{ provision_hcloud_server_result.hcloud_server.ipv4_address }}"
+    server_id: "{{ provision_hcloud_server_result.hcloud_server.id }}"
+
+- name: Store server facts
+  ansible.builtin.set_fact:
+    provision_hcloud_server_id: "{{ provision_hcloud_server_result.hcloud_server.id }}"
+    provision_hcloud_server_public_ip: "{{ provision_hcloud_server_result.hcloud_server.ipv4_address }}"

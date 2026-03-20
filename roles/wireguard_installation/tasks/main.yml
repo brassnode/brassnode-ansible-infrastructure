@@ -1,0 +1,25 @@
+---
+- name: Include OS-specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ ansible_distribution | lower }}.yml"
+    - "{{ ansible_os_family | lower }}.yml"
+    - "default.yml"
+  tags: wireguard
+
+- name: Install WireGuard
+  ansible.builtin.include_tasks: install.yml
+  tags: wireguard
+
+- name: Generate keys
+  ansible.builtin.include_tasks: keys.yml
+  tags: wireguard
+
+- name: Configure WireGuard interface
+  ansible.builtin.include_tasks: configure.yml
+  tags: wireguard
+
+- name: Enable and start WireGuard
+  ansible.builtin.include_tasks: service.yml
+  tags: wireguard

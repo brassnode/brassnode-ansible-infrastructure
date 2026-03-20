@@ -1,0 +1,11 @@
+---
+hcloud_token: "{{ lookup('env', 'HCLOUD_TOKEN') }}"
+hcloud_ssh_key_name: "{{ lookup('env', 'HCLOUD_SSH_KEY_NAME') }}"
+hcloud_datacenter: "{{ lookup('env', 'HCLOUD_DATACENTER') }}"
+dipm_service_key: "{{ lookup('env', 'DIPM_SERVICE_KEY') }}"
+dipm_api_port: "{{ lookup('env', 'DIPM_API_PORT') | default(3000, true) }}"
+server_name: "{{ lookup('env', 'DIPM_SERVER_NAME') }}"
+private_ip: "{{ lookup('env', 'DIPM_PRIVATE_IP') }}"
+deploy_and_start_haraka_server_node_version: "{{ lookup('env', 'HARAKA_NODE_VERSION') | default('24', true) }}"
+haraka_ips_per_server: "{{ lookup('env', 'HARAKA_IPS_PER_SERVER') | default(4, true) }}"
+deploy_and_start_haraka_server_smtp_port: "{{ lookup('env', 'HARAKA_SMTP_PORT') | default(587, true) }}"

@@ -1,0 +1,95 @@
+---
+- name: Check if server private key already exists
+  ansible.builtin.stat:
+    path: "/etc/wireguard/{{ wireguard_interface }}_private.key"
+  register: _wg_privkey_stat
+
+- name: Generate server private key
+  ansible.builtin.shell:
+    cmd: "wg genkey > /etc/wireguard/{{ wireguard_interface }}_private.key"
+  when: not _wg_privkey_stat.stat.exists
+  no_log: true
+
+- name: Set permissions on private key
+  ansible.builtin.file:
+    path: "/etc/wireguard/{{ wireguard_interface }}_private.key"
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Read server private key
+  ansible.builtin.slurp:
+    src: "/etc/wireguard/{{ wireguard_interface }}_private.key"
+  register: _wg_privkey
+  no_log: true
+
+- name: Check if server public key already exists
+  ansible.builtin.stat:
+    path: "/etc/wireguard/{{ wireguard_interface }}_public.key"
+  register: _wg_pubkey_stat
+
+- name: Derive server public key
+  ansible.builtin.shell:
+    cmd: "wg pubkey < /etc/wireguard/{{ wireguard_interface }}_private.key > /etc/wireguard/{{ wireguard_interface }}_public.key"
+  when: not _wg_pubkey_stat.stat.exists
+
+- name: Read server public key
+  ansible.builtin.slurp:
+    src: "/etc/wireguard/{{ wireguard_interface }}_public.key"
+  register: _wg_pubkey
+
+- name: Set key facts
+  ansible.builtin.set_fact:
+    wg_server_private_key: "{{ _wg_privkey.content | b64decode | trim }}"
+    wg_server_public_key: "{{ _wg_pubkey.content | b64decode | trim }}"
+  no_log: true
+
+- name: Print server public key
+  ansible.builtin.debug:
+    msg: "WireGuard server public key: {{ wg_server_public_key }}"
+
+# ── Per-peer preshared keys ────────────────────────────────────────────────
+- name: Generate preshared keys for peers
+  ansible.builtin.shell:
+    cmd: "wg genpsk > /etc/wireguard/psk_{{ item.name }}.key"
+    creates: "/etc/wireguard/psk_{{ item.name }}.key"
+  loop: "{{ wireguard_peers }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: wireguard_use_preshared_keys | bool
+  no_log: true
+
+- name: Set permissions on preshared keys
+  ansible.builtin.file:
+    path: "/etc/wireguard/psk_{{ item.name }}.key"
+    owner: root
+    group: root
+    mode: "0600"
+  loop: "{{ wireguard_peers }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: wireguard_use_preshared_keys | bool
+
+- name: Read preshared keys
+  ansible.builtin.slurp:
+    src: "/etc/wireguard/psk_{{ item.name }}.key"
+  register: _wg_psks
+  loop: "{{ wireguard_peers }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: wireguard_use_preshared_keys | bool
+  no_log: true
+
+- name: Build preshared key map
+  ansible.builtin.set_fact:
+    wg_psk_map: >-
+      {{
+        wg_psk_map | default({}) | combine({
+          item.item.name: item.content | b64decode | trim
+        })
+      }}
+  loop: "{{ _wg_psks.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+  when: wireguard_use_preshared_keys | bool
+  no_log: true

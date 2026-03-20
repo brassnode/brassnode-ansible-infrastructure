@@ -1,0 +1,26 @@
+---
+- name: Create and attach floating IPs
+  hetzner.hcloud.floating_ip:
+    api_token: "{{ hcloud_token }}"
+    name: "{{ server_name }}-ip-{{ item }}"
+    type: ipv4
+    server: "{{ server_name }}"
+    state: present
+  loop: "{{ range(1, haraka_ips_per_server | int + 1) | list }}"
+  loop_control:
+    label: "{{ server_name }}-ip-{{ item }}"
+  register: provision_hcloud_server_created_ips
+
+- name: Store created floating IP addresses
+  ansible.builtin.set_fact:
+    provision_hcloud_server_floating_ip_addresses: "{{ provision_hcloud_server_created_ips.results | map(attribute='hcloud_floating_ip.ip') | list }}"
+    provision_hcloud_server_floating_ip_ids: "{{ provision_hcloud_server_created_ips.results | map(attribute='hcloud_floating_ip.id') | list }}"
+
+- name: Display floating IP addresses
+  ansible.builtin.debug:
+    msg: "{{ provision_hcloud_server_floating_ip_addresses }}"
+
+- name: Push floating IPs into server in-memory inventory
+  ansible.builtin.add_host:
+    name: "{{ server_name }}"
+    provision_hcloud_server_floating_ip_addresses: "{{ provision_hcloud_server_floating_ip_addresses }}"

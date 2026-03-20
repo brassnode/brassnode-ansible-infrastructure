@@ -1,0 +1,9 @@
+---
+galaxy_info:
+  author: "Elizabeth Ogundepo"
+  license: "Proprietary"
+  role_name: wireguard
+  description: Installs and configures WireGuard VPN server with peer management
+  min_ansible_version: "2.15"
+
+dependencies: []

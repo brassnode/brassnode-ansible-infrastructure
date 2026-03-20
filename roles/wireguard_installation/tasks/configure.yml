@@ -1,0 +1,32 @@
+---
+- name: Deploy WireGuard server config
+  ansible.builtin.template:
+    src: wg.conf.j2
+    dest: "/etc/wireguard/{{ wireguard_interface }}.conf"
+    owner: root
+    group: root
+    mode: "0600"
+  notify: restart wireguard
+
+- name: Deploy client configs
+  ansible.builtin.template:
+    src: client.conf.j2
+    dest: "/etc/wireguard/clients/{{ item.name }}.conf"
+    owner: root
+    group: root
+    mode: "0600"
+  loop: "{{ wireguard_peers }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - wireguard_generate_client_configs | bool
+    - item.public_key is defined
+
+- name: Ensure client config directory exists
+  ansible.builtin.file:
+    path: /etc/wireguard/clients
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  when: wireguard_generate_client_configs | bool

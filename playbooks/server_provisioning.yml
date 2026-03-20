@@ -1,0 +1,30 @@
+---
+- name: Provision Hetzner Server and Attach IPs
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - ../vars/common.yml
+
+  pre_tasks:
+    - name: Validate required variables
+      ansible.builtin.assert:
+        that:
+          - hcloud_datacenter | length > 0
+          - hcloud_datacenter in ['fsn1', 'nbg1', 'hel1']
+          - server_name | length > 0
+          - private_ip | length > 0
+        fail_msg: "export HCLOUD_DATACENTER=fsn1 DIPM_SERVER_NAME=haraka-fsn1-1 DIPM_PRIVATE_IP=10.0.1.3"
+
+    - name: Load datacenter variables
+      ansible.builtin.include_vars:
+        file: "../vars/{{ hcloud_datacenter }}.yml"
+
+  roles:
+    - role: provision_hcloud_server
+
+  post_tasks:
+    - name: Wait for SSH to be available
+      ansible.builtin.wait_for:
+        host: "{{ hostvars[server_name]['ansible_host'] }}"
+        port: 22
+        timeout: 120

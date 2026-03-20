@@ -1,0 +1,58 @@
+---
+# ──────────────────────────────────────────────
+# Interface
+# ──────────────────────────────────────────────
+wireguard_interface: "wg0"
+wireguard_address: "10.0.0.1/24" # Server tunnel address + subnet
+wireguard_port: 51820
+wireguard_dns: [] # e.g. ["1.1.1.1", "1.0.0.1"]
+
+# ──────────────────────────────────────────────
+# Routing / NAT
+# ──────────────────────────────────────────────
+# Set to your server's public network interface to enable NAT (e.g. "eth0", "ens3")
+# wireguard_nat_interface: "eth0"
+
+wireguard_enable_ip_forward: true
+wireguard_enable_ipv6: false
+
+# ──────────────────────────────────────────────
+# Peers
+# ──────────────────────────────────────────────
+# Each peer requires at minimum: name, public_key, allowed_ips
+#
+# wireguard_peers:
+#   - name: laptop
+#     public_key: "<client_public_key>"
+#     allowed_ips:
+#       - "10.0.0.2/32"
+#   - name: phone
+#     public_key: "<client_public_key>"
+#     allowed_ips:
+#       - "10.0.0.3/32"
+#     persistent_keepalive: 25        # Override per peer
+#     endpoint: "client.example.com:51820"  # Optional, for site-to-site
+
+wireguard_peers: []
+
+# ──────────────────────────────────────────────
+# Security
+# ──────────────────────────────────────────────
+wireguard_use_preshared_keys: true # Generate a PSK per peer (recommended)
+wireguard_persistent_keepalive: 25 # 0 to disable globally
+
+# ──────────────────────────────────────────────
+# Client config generation
+# ──────────────────────────────────────────────
+wireguard_generate_client_configs: true
+# wireguard_server_public_ip: ""       # Required if generating client configs
+
+# Default AllowedIPs on the client side (route all traffic through VPN)
+wireguard_client_allowed_ips:
+  - "0.0.0.0/0"
+
+# ──────────────────────────────────────────────
+# Service
+# ──────────────────────────────────────────────
+wireguard_service_state: started
+wireguard_service_enabled: true

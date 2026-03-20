@@ -1,0 +1,39 @@
+# Managed by Ansible — do not edit manually
+# Role: wireguard | Interface: {{ wireguard_interface }}
+
+[Interface]
+Address    = {{ wireguard_address }}
+ListenPort = {{ wireguard_port }}
+PrivateKey = {{ wg_server_private_key }}
+{% if wireguard_dns is defined and wireguard_dns | length > 0 %}
+DNS        = {{ wireguard_dns | join(', ') }}
+{% endif %}
+
+# NAT / masquerade — required when routing client traffic to the internet
+{% if wireguard_nat_interface is defined %}
+PostUp   = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; iptables -t nat -A POSTROUTING -o {{ wireguard_nat_interface }} -j MASQUERADE
+PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT; iptables -t nat -D POSTROUTING -o {{ wireguard_nat_interface }} -j MASQUERADE
+{% if wireguard_enable_ipv6 | bool %}
+PostUp   = ip6tables -A FORWARD -i %i -j ACCEPT; ip6tables -A FORWARD -o %i -j ACCEPT; ip6tables -t nat -A POSTROUTING -o {{ wireguard_nat_interface }} -j MASQUERADE
+PostDown = ip6tables -D FORWARD -i %i -j ACCEPT; ip6tables -D FORWARD -o %i -j ACCEPT; ip6tables -t nat -D POSTROUTING -o {{ wireguard_nat_interface }} -j MASQUERADE
+{% endif %}
+{% endif %}
+
+{% for peer in wireguard_peers %}
+# ── Peer: {{ peer.name }} ──
+[Peer]
+PublicKey           = {{ peer.public_key }}
+AllowedIPs          = {{ peer.allowed_ips | join(', ') }}
+{% if wireguard_use_preshared_keys | bool and wg_psk_map is defined %}
+PresharedKey        = {{ wg_psk_map[peer.name] }}
+{% endif %}
+{% if peer.endpoint is defined %}
+Endpoint            = {{ peer.endpoint }}
+{% endif %}
+{% if peer.persistent_keepalive is defined %}
+PersistentKeepalive = {{ peer.persistent_keepalive }}
+{% elif wireguard_persistent_keepalive > 0 %}
+PersistentKeepalive = {{ wireguard_persistent_keepalive }}
+{% endif %}
+
+{% endfor %}

@@ -1,0 +1,6 @@
+---
+- name: Import create server tasks
+  ansible.builtin.import_tasks: create_server.yml
+
+- name: Import attach IPs tasks
+  ansible.builtin.import_tasks: attach_ips.yml
