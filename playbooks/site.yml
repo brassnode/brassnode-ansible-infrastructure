@@ -1,0 +1,6 @@
+---
+- name: Provision server
+  ansible.builtin.import_playbook: 01_server_provisioning.yml
+
+- name: Install WireGuard
+  ansible.builtin.import_playbook: 02_wireguard_installation.yml

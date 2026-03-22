@@ -1,11 +1,6 @@
 ---
-# Example: install WireGuard on a Hetzner cx23 server
-#
-# Usage:
-#   ansible-playbook wireguard.yml -i inventory.yml
-
 - name: Install and configure WireGuard VPN
-  hosts: hetzner_servers
+  hosts: vpn
   become: true
   gather_facts: true
 
@@ -13,21 +8,17 @@
     wireguard_interface: "wg0"
     wireguard_address: "10.0.0.1/24"
     wireguard_port: 51820
-    wireguard_nat_interface: "eth0" # adjust to your server's public NIC
-    wireguard_server_public_ip: "1.2.3.4" # your server's public IP
+    wireguard_nat_interface: "eth0"
+    wireguard_server_public_ip: "{{ server_public_ip }}"
     wireguard_dns:
       - "1.1.1.1"
       - "1.0.0.1"
 
     wireguard_peers:
-      - name: laptop
-        public_key: "<LAPTOP_PUBLIC_KEY>"
+      - name: elizabeth
+        public_key: "J+OIlWeCKJQhMnTJgqZsz4VQLiz3RUuCROYOcB+T1h4="
         allowed_ips:
           - "10.0.0.2/32"
-      - name: phone
-        public_key: "<PHONE_PUBLIC_KEY>"
-        allowed_ips:
-          - "10.0.0.3/32"
         persistent_keepalive: 25
 
     wireguard_use_preshared_keys: true
@@ -39,7 +30,7 @@
       - "::/0"
 
   roles:
-    - role: wireguard
+    - role: wireguard_installation
 
   post_tasks:
     - name: Show WireGuard status

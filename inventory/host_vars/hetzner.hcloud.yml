@@ -1,0 +1,6 @@
+---
+plugin: hetzner.hcloud.hcloud
+token: "{{ lookup('env', 'HCLOUD_TOKEN') }}"
+groups:
+  haraka: "'vpn' in inventory_hostname"
+  relay: "'relay' in inventory_hostname"

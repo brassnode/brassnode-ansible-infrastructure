@@ -13,14 +13,14 @@
           - hcloud_datacenter in ['fsn1', 'nbg1', 'hel1']
           - server_name | length > 0
           - private_ip | length > 0
-        fail_msg: "export HCLOUD_DATACENTER=fsn1 DIPM_SERVER_NAME=haraka-fsn1-1 DIPM_PRIVATE_IP=10.0.1.3"
+        fail_msg: "export HCLOUD_DATACENTER=fsn1 DIPM_SERVER_NAME=vpn-fsn1-1 DIPM_PRIVATE_IP=10.0.1.3"
 
     - name: Load datacenter variables
       ansible.builtin.include_vars:
         file: "../vars/{{ hcloud_datacenter }}.yml"
 
   roles:
-    - role: provision_hcloud_server
+    - role: server_provisioning
 
   post_tasks:
     - name: Wait for SSH to be available

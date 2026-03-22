@@ -1,0 +1,9 @@
+---
+create_hcloud_network_name: brudcast-nbg1
+create_hcloud_network_zone: eu-central
+create_hcloud_network_ip_range: 10.1.0.0/16
+create_hcloud_network_infra_subnet: 10.1.0.0/24
+create_hcloud_network_haraka_subnet: 10.1.1.0/24
+dipm_private_ip: "10.1.0.2"
+dipm_url: "http://10.1.0.2:3000"
+mailing_relay_private_ip: "10.1.0.4"

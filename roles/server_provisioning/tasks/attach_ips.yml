@@ -6,7 +6,7 @@
     type: ipv4
     server: "{{ server_name }}"
     state: present
-  loop: "{{ range(1, haraka_ips_per_server | int + 1) | list }}"
+  loop: "{{ range(1, vpn_ips_per_server | int + 1) | list }}"
   loop_control:
     label: "{{ server_name }}-ip-{{ item }}"
   register: provision_hcloud_server_created_ips
