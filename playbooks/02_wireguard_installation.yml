@@ -16,7 +16,7 @@
 
     wireguard_peers:
       - name: elizabeth
-        public_key: "J+OIlWeCKJQhMnTJgqZsz4VQLiz3RUuCROYOcB+T1h4="
+        public_key: "iBY9R/2YJeVQNOYnAnYopeBM/yjE0AW8qHGwJWlDjVE="
         allowed_ips:
           - "10.0.0.2/32"
         persistent_keepalive: 25

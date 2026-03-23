@@ -1,2 +1,7 @@
 venv
 .*
+*.retry
+.vault_pass
+*.pem
+*.key
+*.log
